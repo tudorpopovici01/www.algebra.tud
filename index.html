@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="title">Algebra Ajutor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            min-height: 50px;
+        }
+    </style>
+</head>
+<body>
+    <h1 id="headerTitle">Algebra Ajutor</h1>
+    <label for="language" id="languageLabel">Selectează limba:</label>
+    <select id="language" onchange="changeLanguage()">
+        <option value="ro">Română</option>
+        <option value="en">English</option>
+    </select>
+    <br><br>
+    <label for="exerciseType" id="exerciseLabel">Tip de exercițiu:</label>
+    <select id="exerciseType">
+        <option value="equations">Ecuatii</option>
+        <option value="inequalities">Inegalitati</option>
+        <option value="functions">Functii</option>
+    </select>
+    <br><br>
+    <input type="text" id="exerciseInput" placeholder="Introduceți exercițiul">
+    <button onclick="solveExercise()" id="solveButton">Rezolvă</button>
+    <div id="result"></div>
+
+    <script>
+        const translations = {
+            "ro": {
+                "title": "Algebra Ajutor",
+                "headerTitle": "Algebra Ajutor",
+                "languageLabel": "Selectează limba:",
+                "exerciseLabel": "Tip de exercițiu:",
+                "solveButton": "Rezolvă",
+                "exerciseInput": "Introduceți exercițiul",
+                "resultPlaceholder": "Introduceți un exercițiu valid.",
+                "generatingResponse": "Se generează răspuns...",
+                "responsePrefix": "Răspuns generat: "
+            },
+            "en": {
+                "title": "Algebra Helper",
+                "headerTitle": "Algebra Helper",
+                "languageLabel": "Select Language:",
+                "exerciseLabel": "Exercise Type:",
+                "solveButton": "Solve",
+                "exerciseInput": "Enter the exercise",
+                "resultPlaceholder": "Please enter a valid exercise.",
+                "generatingResponse": "Generating response...",
+                "responsePrefix": "Generated answer: "
+            }
+        };
+
+        function changeLanguage() {
+            let lang = document.getElementById("language").value;
+            document.getElementById("title").innerText = translations[lang]["title"];
+            document.getElementById("headerTitle").innerText = translations[lang]["headerTitle"];
+            document.getElementById("languageLabel").innerText = translations[lang]["languageLabel"];
+            document.getElementById("exerciseLabel").innerText = translations[lang]["exerciseLabel"];
+            document.getElementById("solveButton").innerText = translations[lang]["solveButton"];
+            document.getElementById("exerciseInput").placeholder = translations[lang]["exerciseInput"];
+        }
+
+        async function solveExercise() {
+            let lang = document.getElementById("language").value;
+            let exercise = document.getElementById("exerciseInput").value;
+            let exerciseType = document.getElementById("exerciseType").value;
+            let resultDiv = document.getElementById("result");
+            
+            if (exercise.trim() === "") {
+                resultDiv.innerText = translations[lang]["resultPlaceholder"];
+                return;
+            }
+            
+            resultDiv.innerText = translations[lang]["generatingResponse"];
+            
+            try {
+                let response = await fetch("/solve-exercise", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        language: lang,
+                        exerciseType: exerciseType,
+                        exercise: exercise
+                    })
+                });
+                
+                let data = await response.json();
+                resultDiv.innerText = translations[lang]["responsePrefix"] + data.solution;
+            } catch (error) {
+                resultDiv.innerText = "Eroare la conectarea cu serverul.";
+            }
+        }
+    </script>
+</body>
+</html>
